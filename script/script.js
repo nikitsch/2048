@@ -3,26 +3,61 @@ import { Tile } from "./Tile.js"
 
 const gameBoard = document.getElementById("game_board");
 
-const grid = new Grid(gameBoard);
+let grid = new Grid(gameBoard);
 
 (function initialStateGrid() {
   const store = JSON.parse(localStorage.getItem('filledCells'));
   if (store) {
     for (const filledCell of store) {
       const { x, y, value } = filledCell;
-      grid.getCell(x, y).linkTile(new Tile(gameBoard));
-      grid.getCell(x, y).linkedTile.setValue(value);
+      const currentCell = grid.getCell(x, y);
+      currentCell.linkTile(new Tile(gameBoard));
+      currentCell.linkedTile.setValue(value);
     }
+    setupPopup();
   } else {
-    grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
+    setupRandomCell();
+  }
+})();
+
+function setupPopup() {
+  const popup = document.createElement('div');
+  popup.className = 'popup';
+  gameBoard.insertAdjacentElement('afterend', popup);
+
+  const closePopup = () => popup.remove();
+
+  const continueBtn = document.createElement('button');
+  continueBtn.className = 'btn';
+  continueBtn.textContent = 'Continue';
+  popup.appendChild(continueBtn);
+  continueBtn.addEventListener('click', closePopup);
+
+  const startOverBtn = document.createElement('button');
+  startOverBtn.className = 'btn';
+  startOverBtn.textContent = 'Start Over';
+  popup.appendChild(startOverBtn);
+  startOverBtn.addEventListener('click', function() {
+    setupNewGame();
+    closePopup();
+  });
+
+}
+
+function setupRandomCell(length = 2) {
+  for (let i = 0; i < length; i++) {
     grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
   }
+}
 
-  // const popup = document.createElement('div');
-  // popup.textContent = 'New Item';
-  // popup.className = 'popup';
-  // gameBoard.insertAdjacentElement('afterend', popup);
-})();
+function setupNewGame() {
+  Object.values(grid.getFilledCells()).forEach(cell => {
+    cell.linkedTile.removeFromDOM();
+    cell.unlinkTile();
+  })
+  localStorage.clear();
+  setupRandomCell();
+}
 
 setupInputOnce();
 function setupInputOnce() {
@@ -83,6 +118,7 @@ async function handleInput(event) {
   if (!canMoveUp() && !canMoveDown() && !canMoveRight() && !canMoveLeft()) {
     await newTile.waitForAnimationEnd();
     alert("YOU LOSE");
+    localStorage.clear();
     return;
   }
 
