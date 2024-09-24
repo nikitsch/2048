@@ -20,6 +20,10 @@ export class Cell {
     return !this.linkedTile;
   }
 
+  isFilled() {
+    return this.linkedTile;
+  }
+
   linkTileForMerge(tile) {
     tile.setXY(this.x, this.y);
     this.linkedTileForMerge = tile;

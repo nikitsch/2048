@@ -25,6 +25,14 @@ export class Grid {
     return emptyCells[randomIndex];
   }
 
+  getCell(x, y) {
+    return this.cells.find(cell => x === cell.x && y === cell.y);
+  }
+  
+  getFilledCells() {
+    return this.cells.filter(cell => cell.isFilled());
+  }
+
   groupCellsByColumn() {
     return this.cells.reduce((groupedCells, cell) => {
       groupedCells[cell.x] = groupedCells[cell.x] || [];

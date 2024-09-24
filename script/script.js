@@ -4,13 +4,38 @@ import { Tile } from "./Tile.js"
 const gameBoard = document.getElementById("game_board");
 
 const grid = new Grid(gameBoard);
-grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
-grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
+
+(function initialStateGrid() {
+  const store = JSON.parse(localStorage.getItem('filledCells'));
+  if (store) {
+    for (const filledCell of store) {
+      const { x, y, value } = filledCell;
+      grid.getCell(x, y).linkTile(new Tile(gameBoard));
+      grid.getCell(x, y).linkedTile.setValue(value);
+    }
+  } else {
+    grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
+    grid.getRandomEmptyCell().linkTile(new Tile(gameBoard));
+  }
+
+  // const popup = document.createElement('div');
+  // popup.textContent = 'New Item';
+  // popup.className = 'popup';
+  // gameBoard.insertAdjacentElement('afterend', popup);
+})();
 
 setupInputOnce();
-
 function setupInputOnce() {
   window.addEventListener("keydown", handleInput, { once: true });
+  saveFilledCells();
+}
+
+function saveFilledCells() {
+  const value = Object.values(grid.getFilledCells()).map(({ linkedTile }) => {
+    const { tileElement, ...rest } = linkedTile;
+    return rest;
+  });
+  localStorage.setItem('filledCells', JSON.stringify(value))
 }
 
 async function handleInput(event) {
